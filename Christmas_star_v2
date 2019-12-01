@@ -12,9 +12,9 @@
 
 #define PARTS          5    // equal parts in the figure
 
-#define OFFSET         -5    // offset to start if peak is not starting at pixel 0
+#define OFFSET         -5    // offset to start if not starting at pixel 0
 
-#define NUMPATTERNS   18
+#define NUMPATTERNS   17
 
 #define  RED           0xff0000
 #define  GREEN         0x00ff00
@@ -30,29 +30,20 @@ int delayval = 500; // delay for half a second
 long randNumber, randNumber2;
 int pattern, repetitions;
 int switcher = 0, repeater = 1;
-boolean randompattern = true, randomrepeat = true;
 
 void setup() {
   strip.begin(); // This initializes the NeoPixel library.
   strip.setBrightness(BRIGHTNESS);
   randomSeed(analogRead(0));
-
 }
 
 void loop()
 {
   randNumber = random(1, NUMPATTERNS);
   randNumber2 = random(2, 4);
-  
-  if (randompattern)
-    switcher = randNumber;
-  else
-    switcher = pattern;
-  if (randomrepeat)
-    repeater = randNumber2;
-  else
-    repeater = repetitions;
- 
+  switcher = randNumber;
+  repeater = randNumber2;
+
   switch (switcher)
   {
     case 1: changecolors(repeater); break;
@@ -66,14 +57,18 @@ void loop()
     case 9: rainbowCycle(10, repeater); break;
     case 10: blinkcolors(repeater); break;
     case 11: steadycolors(repeater); break;
-    case 12: steadycolors(repeater); break;
-    case 13: rotatetips(repeater); break;
-    case 14: fillfromcenter(repeater); break;
-    case 15: fillfromtip(repeater); break;
-    case 16: colorsfromcenter(repeater); break;
-    case 17: colorrun(repeater); break;
-    case 18: colorfill(repeater); break;
+    case 12: rotatetips(repeater); break;
+    case 13: fillfromcenter(repeater); break;
+    case 14: fillfromtip(repeater); break;
+    case 15: colorsfromcenter(repeater); break;
+    case 16: colorrun(repeater); break;
+    case 17: colorfill(repeater); break;
   }
+  /*
+    switcher++;
+    if (switcher > NUMPATTERNS)
+    switcher = 0;
+  */
 }
 
 // From Adafruit library
@@ -169,7 +164,6 @@ void fillfromcenter(int repeat)
       }
       stripoff();
     }
-
   }
 }
 
@@ -194,7 +188,6 @@ void fillfromtip(int repeat)
       }
       stripoff();
     }
-
   }
 }
 
@@ -218,9 +211,7 @@ void rotatetips(int repeat)
         delay(delayval);
         stripoff();
       }
-
     }
-
   }
 }
 
@@ -238,9 +229,9 @@ void fadecolors(int repeat)
         {
           strip.setBrightness(fade * 2);
           strip.setPixelColor(i, COLOR[color]);
-          strip.show();
         }
-        delay(1);
+        strip.show();
+        delay(20);
       }
       for (int fade = BRIGHTNESS / 2; fade > 0; fade--)
       {
@@ -248,12 +239,11 @@ void fadecolors(int repeat)
         {
           strip.setBrightness(fade * 2);
           strip.setPixelColor(i, COLOR[color]);
-          strip.show();
         }
-        delay(1);
+        strip.show();
+        delay(20);
       }
     }
-
   }
   strip.setBrightness(BRIGHTNESS);
 }
@@ -270,13 +260,6 @@ void blinkcolors(int repeat) {
       strip.show();
       delay(delayval);
       stripoff();
-      /*
-        for (int i = 0; i < NUMPIXELS; i++)
-        {
-        strip.setPixelColor(i, OFF);
-        }
-        strip.show();
-      */
       delay(delayval);
     }
   }
@@ -299,13 +282,6 @@ void colorrun(int repeat)
         strip.show();
         delay(delayval / 2);
         stripoff();
-        /*
-          for (int i = 0; i < NUMPIXELS; i++)
-          {
-          strip.setPixelColor(i, OFF);
-          }
-          strip.show();
-        */
       }
     }
   }
@@ -347,13 +323,6 @@ void colorsfromtip2(int repeat)
         }
         delay(delayval);
         stripoff();
-        /*
-          for (int i = 0; i < NUMPIXELS; i++)
-          {
-          strip.setPixelColor(i, OFF);
-          strip.show();
-          }
-        */
       }
     }
   }
@@ -361,11 +330,9 @@ void colorsfromtip2(int repeat)
 
 void colorsfromtip3(int repeat)
 {
-  //client.publish(status_topic, "colors from tip3");
   // vanaf de punt van de ster naar beide dalen, red -> green -> blue -> red -> green -> blue -> red -> green -> blue
   for (int k = 0; k < repeat; k++)
   {
-
     for (int i = 0; i < ((NUMPIXELS / PARTS / 2) + 1); i++)
     {
       for (int j = 0; j < (PARTS + 1); j++)
@@ -377,13 +344,6 @@ void colorsfromtip3(int repeat)
       delay(delayval);
     }
     stripoff();
-    /*
-      for (int i = 0; i < NUMPIXELS; i++)
-      {
-      strip.setPixelColor(i, OFF);
-      strip.show();
-      }
-    */
     delay(delayval);
   }
 }
@@ -398,9 +358,8 @@ void steadycolors(int repeat)
       strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[i]);
       strip.show();
     }
-
   }
-  delay(delayval * repeat);
+  delay(delayval * repeat * 4);
 }
 
 void colorchase(int repeat)
@@ -428,7 +387,6 @@ void changecolors(int repeat)
       for (int i = 0; i < NUMPIXELS; i++)
       {
         strip.setPixelColor(i, COLOR[k]);
-
       }
       strip.show();
       delay(delayval);
@@ -440,7 +398,7 @@ void RGBcolorstocenter(int repeat)
 {
   //client.publish(status_topic, "colors to center");
   // R G B vanaf de punt van de ster naar beide dalen
-  for (int m = 0; m < repeat; m++) {
+  for (int m = 0; m < repeat * 2; m++) {
     for (int k = 3; k > 0; k--)
     {
       for (int i = ((NUMPIXELS / PARTS / 2) + 1); i >= 0; i--)
@@ -460,7 +418,7 @@ void RGBcolorsfromcenter(int repeat)
 {
   //client.publish(status_topic, "colors from center");
   // R G B vanaf de dalen van de ster naar de punt,
-  for (int m = 0; m < repeat; m++) {
+  for (int m = 0; m < repeat * 2; m++) {
     for (int k = 0; k < 3; k++)
     {
 
@@ -472,7 +430,6 @@ void RGBcolorsfromcenter(int repeat)
           strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[k + i]);
           strip.show();
         }
-
       }
       delay(delayval);
     }
@@ -485,7 +442,6 @@ void stripoff(void)
   for (int i = 0; i < NUMPIXELS; i++)
   {
     strip.setPixelColor(i, OFF);
-
   }
   strip.show();
 }
