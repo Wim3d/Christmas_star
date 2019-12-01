@@ -101,6 +101,7 @@ uint32_t Wheel(byte WheelPos) {
 
 void colorsfromtip(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colorsfromtip");
   // vanaf de punt van de ster naar beide dalen, kleur neemt over
   for (int k = 0; k < repeat; k++)
@@ -123,6 +124,7 @@ void colorsfromtip(int repeat)
 
 void colorsfromcenter(int repeat)
 {
+  stripoff();
   //from center to tip, starting with LEDs off
   for (int k = 0; k < repeat; k++)
   {
@@ -145,6 +147,7 @@ void colorsfromcenter(int repeat)
 
 void fillfromcenter(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colorsfromtip");
   // vanaf de punt van de ster naar beide dalen, kleur neemt over
   //from center to tip, starting with LEDs off
@@ -169,6 +172,7 @@ void fillfromcenter(int repeat)
 
 void fillfromtip(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colorsfromtip");
   // vanaf de punt van de ster naar beide dalen, kleur neemt over
   //from center to tip, starting with LEDs off
@@ -193,6 +197,7 @@ void fillfromtip(int repeat)
 
 void rotatetips(int repeat)
 {
+  stripoff();
   // one total tip is lit, rotating
   for (int k = 0; k < repeat; k++)
   {
@@ -248,8 +253,9 @@ void fadecolors(int repeat)
   strip.setBrightness(BRIGHTNESS);
 }
 
-void blinkcolors(int repeat) {
-  //client.publish(status_topic, "blink colors");
+void blinkcolors(int repeat) 
+{
+    //client.publish(status_topic, "blink colors");
   for (int j = 0; j < repeat; j++)
   { for (int color = 0; color < 3; color++)
     {
@@ -267,6 +273,7 @@ void blinkcolors(int repeat) {
 
 void colorrun(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "color run");
   for (int k = 0; k < repeat; k++)
   {
@@ -288,6 +295,7 @@ void colorrun(int repeat)
 }
 void colorfill(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colorfill");
   for (int k = 0; k < repeat; k++)
   {
@@ -307,6 +315,7 @@ void colorfill(int repeat)
 }
 void colorsfromtip2(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colorsfrom tip2");
   // vanaf de punt van de ster naar beide dalen, met lege ruimte er tussen.
   for (int k = 0; k < repeat; k++)
@@ -330,6 +339,7 @@ void colorsfromtip2(int repeat)
 
 void colorsfromtip3(int repeat)
 {
+  stripoff();
   // vanaf de punt van de ster naar beide dalen, red -> green -> blue -> red -> green -> blue -> red -> green -> blue
   for (int k = 0; k < repeat; k++)
   {
@@ -364,6 +374,7 @@ void steadycolors(int repeat)
 
 void colorchase(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "color chase");
   for (int m = 0; m < repeat; m++) {
     for (int k = 0; k < 3; k++)
@@ -380,6 +391,7 @@ void colorchase(int repeat)
 
 void changecolors(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "change colors");
   for (int m = 0; m < repeat; m++) {
     for (int k = 0; k < 3; k++)
@@ -396,6 +408,7 @@ void changecolors(int repeat)
 
 void RGBcolorstocenter(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colors to center");
   // R G B vanaf de punt van de ster naar beide dalen
   for (int m = 0; m < repeat * 2; m++) {
@@ -416,6 +429,7 @@ void RGBcolorstocenter(int repeat)
 }
 void RGBcolorsfromcenter(int repeat)
 {
+  stripoff();
   //client.publish(status_topic, "colors from center");
   // R G B vanaf de dalen van de ster naar de punt,
   for (int m = 0; m < repeat * 2; m++) {
