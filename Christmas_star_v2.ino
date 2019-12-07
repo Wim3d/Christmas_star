@@ -16,7 +16,7 @@
 
 #define PIXELPERPART  (NUMPIXELS)/(PARTS)
 
-#define NUMPATTERNS   20
+#define NUMPATTERNS   23
 
 #define  RED           0xff0000
 #define  GREEN         0x00ff00
@@ -29,7 +29,7 @@
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
 uint32_t COLOR[] = {RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
-uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > 2* PARTS
+uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > 3* PARTS
 int delayval = 500; // delay for half a second
 
 long randNumber, randNumber2;
@@ -40,7 +40,6 @@ void setup() {
   strip.begin(); // This initializes the NeoPixel library.
   strip.setBrightness(BRIGHTNESS);
   randomSeed(analogRead(0));
-  //Serial.begin(9600);
 }
 
 void loop()
@@ -71,9 +70,9 @@ void loop()
     case 17: colorfill(repeater); break;
     case 18: rotatetipscolors(repeater); break;
     case 19: rotate5colors(repeater); break;
-    case 20: randomfilloff(repeater); break;
+    case 20: rotate10colors(repeater); break;
+    case 21: randomfilloff(repeater); break;
   }
-
   /*
     switcher++;
     if (switcher > NUMPATTERNS)
@@ -304,7 +303,7 @@ void rotate5colors(int repeat)
   stripoff();
   for (int k = 0; k < repeat; k++)
   {
-    for (int h = PARTS; h > 0; h--) // loop through colors
+    for (int h = PARTS - 1; h >= 0; h--) // loop through colors
     {
       for (int i = 0; i < PIXELPERPART; i++)
       {
@@ -312,6 +311,31 @@ void rotate5colors(int repeat)
         {
           strip.fill(COLOR2[h + j], i + (j * PIXELPERPART), PIXELPERPART);
           if (i + PIXELPERPART + (j * PIXELPERPART) > NUMPIXELS)
+            strip.fill(COLOR2[h + j], 0,  i );
+        }
+        strip.show();
+        delay(delayval / 5);
+      }
+    }
+  }
+}
+
+void rotate10colors(int repeat)
+{
+  //strip is filled with PARTS different colors which cycle with one increment
+  if (NUMPIXELS % 2 != 0)
+    return;
+  stripoff();
+  for (int k = 0; k < repeat; k++)
+  {
+    for (int h = PARTS - 1; h >= 0; h--) // loop through colors
+    {
+      for (int i = 0; i < PIXELPERPART / 2; i++)
+      {
+        for (int j = 0; j < PARTS * 2; j++)
+        {
+          strip.fill(COLOR2[h + j], i + (j * PIXELPERPART / 2), PIXELPERPART / 2);
+          if (i + PIXELPERPART / 2 + (j * PIXELPERPART / 2) > NUMPIXELS)
             strip.fill(COLOR2[h + j], 0,  i );
         }
         strip.show();
