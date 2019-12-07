@@ -14,7 +14,9 @@
 
 #define OFFSET         -5    // offset to start if not starting at pixel 0
 
-#define NUMPATTERNS   19
+#define PIXELPERPART  (NUMPIXELS)/(PARTS)
+
+#define NUMPATTERNS   20
 
 #define  RED           0xff0000
 #define  GREEN         0x00ff00
@@ -23,7 +25,7 @@
 #define  MAGENTA       0xff00ff
 #define  OFF           0x000000
 
-long lastReconnectAttempt, lastBlink = 0;
+//long lastReconnectAttempt, lastBlink = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
 uint32_t COLOR[] = {RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
@@ -38,15 +40,15 @@ void setup() {
   strip.begin(); // This initializes the NeoPixel library.
   strip.setBrightness(BRIGHTNESS);
   randomSeed(analogRead(0));
+  //Serial.begin(9600);
 }
 
 void loop()
 {
-  randNumber = random(1, NUMPATTERNS);
+  randNumber = random(1, NUMPATTERNS + 1);
   randNumber2 = random(2, 4);
   switcher = randNumber;
   repeater = randNumber2;
-
 
   switch (switcher)
   {
@@ -69,6 +71,7 @@ void loop()
     case 17: colorfill(repeater); break;
     case 18: rotatetipscolors(repeater); break;
     case 19: rotate5colors(repeater); break;
+    case 20: randomfilloff(repeater); break;
   }
 
   /*
@@ -103,6 +106,65 @@ uint32_t Wheel(byte WheelPos) {
   } else {
     WheelPos -= 170;
     return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
+}
+
+void randomfilloff(int repeat)
+{
+  // random fill with colors
+  for (int k = 0; k < repeat; k++)
+  {
+    for (int color = 0; color < 3; color++)
+    {
+      stripoff();
+      int pixelslit = 0;
+      while (pixelslit < NUMPIXELS)
+      {
+        int r = random(0, NUMPIXELS); // random number of LED in the strip
+        if (strip.getPixelColor(r) == 0)
+        {
+          strip.setPixelColor(r, COLOR[color]);
+          pixelslit++;
+          strip.show();
+          delay(delayval / 8);
+        }
+      }
+      while (pixelslit > 0)
+      {
+        int r = random(0, NUMPIXELS); // random number of LED in the strip
+        if (strip.getPixelColor(r) != 0)
+        {
+          strip.setPixelColor(r, OFF);
+          pixelslit--;
+          strip.show();
+          delay(delayval / 8);
+        }
+      }
+    }
+  }
+}
+
+void randomfill(int repeat)
+{
+  // random fill with colors
+  for (int k = 0; k < repeat; k++)
+  {
+    for (int color = 0; color < 3; color++)
+    {
+      stripoff();
+      int pixelslit = 0;
+      while (pixelslit < NUMPIXELS)
+      {
+        int r = random(0, NUMPIXELS); // random number of LED in the strip
+        if (strip.getPixelColor(r) == 0)
+        {
+          strip.setPixelColor(r, COLOR[color]);
+          pixelslit++;
+          strip.show();
+          delay(delayval / 5);
+        }
+      }
+    }
   }
 }
 
@@ -236,7 +298,6 @@ void rotatetipscolors(int repeat)
   }
 }
 
-
 void rotate5colors(int repeat)
 {
   //strip is filled with PARTS different colors which cycle with one increment
@@ -245,12 +306,12 @@ void rotate5colors(int repeat)
   {
     for (int h = PARTS; h > 0; h--) // loop through colors
     {
-      for (int i = 0; i < NUMPIXELS / PARTS; i++)
+      for (int i = 0; i < PIXELPERPART; i++)
       {
         for (int j = 0; j < PARTS; j++)
         {
-          strip.fill(COLOR2[h + j], i + (j * NUMPIXELS / PARTS), NUMPIXELS / PARTS);
-          if (i + NUMPIXELS / PARTS + (j * NUMPIXELS / PARTS) > NUMPIXELS)
+          strip.fill(COLOR2[h + j], i + (j * PIXELPERPART), PIXELPERPART);
+          if (i + PIXELPERPART + (j * PIXELPERPART) > NUMPIXELS)
             strip.fill(COLOR2[h + j], 0,  i );
         }
         strip.show();
@@ -383,7 +444,7 @@ void colorfill(int repeat)
 void colorsfromtip2(int repeat)
 {
   stripoff();
-    // vanaf de punt van de ster naar beide dalen, met lege ruimte er tussen.
+  // vanaf de punt van de ster naar beide dalen, met lege ruimte er tussen.
   for (int k = 0; k < repeat; k++)
   {
     for (int color = 0; color < 3; color++)
