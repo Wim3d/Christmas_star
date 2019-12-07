@@ -116,7 +116,7 @@ uint32_t Wheel(byte WheelPos) {
 
 void colorchain(int repeat)
 {
-  //strip is filled with TWO different colors which cycle with one increment
+  //strip is filled with TWO different colors and spaces which cycle with one increment
   stripoff();
   int lastledoff;
   if (NUMPIXELS % 3 == 0) // XXO
