@@ -16,13 +16,14 @@
 
 #define PIXELPERPART  (NUMPIXELS)/(PARTS)
 
-#define NUMPATTERNS   22
+#define NUMPATTERNS   23
 
 #define  RED           0xff0000
 #define  GREEN         0x00ff00
 #define  BLUE          0x1111ff     // a little brighter than pure blue
 #define  CYAN          0x00ffff
 #define  MAGENTA       0xff00ff
+#define  WHITE         0xdddddd
 #define  OFF           0x000000
 
 //long lastReconnectAttempt, lastBlink = 0;
@@ -30,6 +31,7 @@
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
 uint32_t COLOR[] = {RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
 uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > 3* PARTS
+uint32_t COLOR3[] = {RED, WHITE};
 int delayval = 500; // delay for half a second
 
 long randNumber, randNumber2;
@@ -48,23 +50,24 @@ void loop()
   randNumber2 = random(2, 4);
   switcher = randNumber;
   repeater = randNumber2;
+
   switch (switcher)
   {
     case 1: changecolors(repeater); break;
     case 2: colorchase(repeater); break;
     case 3: RGBcolorsfromcenter(repeater); break;
     case 4: colorsfromtip2(repeater); break;
-    case 5: colorsfromtip(repeater); break;
+    //case 5: colorsfromtip(repeater); break;
     case 6: RGBcolorstocenter(repeater); break;
     case 7: fadecolors(repeater); break;
-    case 8: colorsfromtip2(repeater); break;
+    case 8: colorsfromtip3(repeater); break;
     case 9: rainbowCycle(10, repeater); break;
     case 10: blinkcolors(repeater); break;
     case 11: steadycolors(repeater); break;
     case 12: rotatetips(repeater); break;
     case 13: fillfromcenter(repeater); break;
     case 14: fillfromtip(repeater); break;
-    case 15: colorsfromcenter(repeater); break;
+    //case 15: colorsfromcenter(repeater); break;
     case 16: colorrun(repeater); break;
     case 17: colorfill(repeater); break;
     case 18: rotatetipscolors(repeater); break;
@@ -72,7 +75,9 @@ void loop()
     case 20: rotate10colors(repeater); break;
     case 21: randomfilloff(repeater); break;
     case 22: colorchain(repeater); break;
+    case 23: candycane(repeater); break;
   }
+
 
   /*
     switcher++;
@@ -111,7 +116,7 @@ uint32_t Wheel(byte WheelPos) {
 
 void colorchain(int repeat)
 {
-  //strip is filled with the first TWO different colors from the array which cycle with one increment
+  //strip is filled with TWO different colors which cycle with one increment
   stripoff();
   int lastledoff;
   if (NUMPIXELS % 3 == 0) // XXO
@@ -144,6 +149,50 @@ void colorchain(int repeat)
             strip.fill(OFF, 0,  i );
             if (i > lastledoff)
               strip.fill(COLOR[(h + j) % 2], 0, i - lastledoff);
+          }
+        }
+        strip.show();
+        delay(delayval);
+      }
+    }
+  }
+}
+
+void candycane(int repeat)
+{
+  //strip is filled with TWO different colors which cycle with one increment
+  stripoff();
+  int lastledoff;
+  if (NUMPIXELS % 3 == 0) // XXX
+  {
+    pattern = 3;
+    lastledoff = 0; // pattern is XXX, so last LED not off
+  }
+  else if (NUMPIXELS % 4 == 0) // XXXX
+  {
+    pattern = 4;
+    lastledoff = 0; // pattern is XXXX, so last LED not off
+  }
+  else if (NUMPIXELS % 5 == 0) // XXXXX
+  {
+    pattern = 5;
+    lastledoff = 0; // pattern is XXXXX, so last LED not off
+  }
+  for (int k = 0; k < repeat * 5; k++)
+  {
+    for (int h = NUMPIXELS / pattern; h > 0; h--) // loop through colors
+    {
+      for (int i = 0; i < pattern; i++)
+      {
+        stripoffnoshow();
+        for (int j = 0; j < NUMPIXELS / pattern; j++)
+        {
+          strip.fill(COLOR3[(h + j) % 2], i + (j * pattern), pattern - lastledoff); // last leds off
+          if (i + pattern + (j * pattern) > NUMPIXELS)
+          {
+            strip.fill(OFF, 0,  i );
+            if (i > lastledoff)
+              strip.fill(COLOR3[(h + j) % 2], 0, i - lastledoff);
           }
         }
         strip.show();
