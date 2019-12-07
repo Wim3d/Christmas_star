@@ -23,14 +23,16 @@
 #define  BLUE          0x1111ff     // a little brighter than pure blue
 #define  CYAN          0x00ffff
 #define  MAGENTA       0xff00ff
-#define  WHITE         0xdddddd
+#define  WHITE         0xbbbbbb
 #define  OFF           0x000000
 
 //long lastReconnectAttempt, lastBlink = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
-uint32_t COLOR[] = {RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
-uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > 3* PARTS
+//uint32_t COLOR[] = {RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
+uint32_t COLOR[] = {RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
+//uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > 3* PARTS
+uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > PARTS
 uint32_t COLOR3[] = {RED, WHITE};
 int delayval = 500; // delay for half a second
 
@@ -51,16 +53,17 @@ void loop()
   switcher = randNumber;
   repeater = randNumber2;
 
+
   switch (switcher)
   {
     case 1: changecolors(repeater); break;
     case 2: colorchase(repeater); break;
     case 3: RGBcolorsfromcenter(repeater); break;
-    case 4: colorsfromtip2(repeater); break;
-    //case 5: colorsfromtip(repeater); break;
+    //case 4: colorsfromtip2(repeater); break;
+    case 5: colorsfromtip(repeater); break;
     case 6: RGBcolorstocenter(repeater); break;
     case 7: fadecolors(repeater); break;
-    case 8: colorsfromtip3(repeater); break;
+    //case 8: colorsfromtip3(repeater); break;
     case 9: rainbowCycle(10, repeater); break;
     case 10: blinkcolors(repeater); break;
     case 11: steadycolors(repeater); break;
@@ -77,13 +80,11 @@ void loop()
     case 22: colorchain(repeater); break;
     case 23: candycane(repeater); break;
   }
-
-
-  /*
-    switcher++;
-    if (switcher > NUMPATTERNS)
+/*
+  switcher++;
+  if (switcher > NUMPATTERNS)
     switcher = 0;
-  */
+*/
 }
 
 // From Adafruit library
@@ -116,7 +117,7 @@ uint32_t Wheel(byte WheelPos) {
 
 void colorchain(int repeat)
 {
-  //strip is filled with TWO different colors and spaces which cycle with one increment
+  //strip is filled with TWO different colors which cycle with one increment
   stripoff();
   int lastledoff;
   if (NUMPIXELS % 3 == 0) // XXO
@@ -134,7 +135,7 @@ void colorchain(int repeat)
     pattern = 5;
     lastledoff = 1; // pattern is XXXXO, so last one LED off
   }
-  for (int k = 0; k < repeat * 5; k++)
+  for (int k = 0; k < repeat; k++)
   {
     for (int h = NUMPIXELS / pattern; h > 0; h--) // loop through colors
     {
@@ -178,7 +179,7 @@ void candycane(int repeat)
     pattern = 5;
     lastledoff = 0; // pattern is XXXXX, so last LED not off
   }
-  for (int k = 0; k < repeat * 5; k++)
+  for (int k = 0; k < repeat; k++)
   {
     for (int h = NUMPIXELS / pattern; h > 0; h--) // loop through colors
     {
@@ -261,27 +262,6 @@ void randomfill(int repeat)
   }
 }
 
-void colorsfromtip(int repeat)
-{
-  stripoff();
-  // from the tips the colors are filled over the different colors
-  for (int k = 0; k < repeat; k++)
-  {
-    for (int color = 0; color < 3; color++)
-    {
-      for (int i = 0; i < ((NUMPIXELS / PARTS / 2) + 1); i++)
-      {
-        for (int j = 0; j < (PARTS + 1); j++)
-        {
-          strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[color]);
-          strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[color]);
-          strip.show();
-        }
-        delay(delayval);
-      }
-    }
-  }
-}
 
 void colorsfromcenter(int repeat)
 {
@@ -325,6 +305,28 @@ void fillfromcenter(int repeat)
         delay(delayval);
       }
       stripoff();
+    }
+  }
+}
+
+void colorsfromtip(int repeat)
+{
+  stripoff();
+  // from the tips the colors are filled over the different colors
+  for (int k = 0; k < repeat; k++)
+  {
+    for (int color = 0; color < 3; color++)
+    {
+      for (int i = 0; i < ((NUMPIXELS / PARTS / 2) + 1); i++)
+      {
+        for (int j = 0; j < (PARTS + 1); j++)
+        {
+          strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[color]);
+          strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[color]);
+          strip.show();
+        }
+        delay(delayval);
+      }
     }
   }
 }
@@ -403,9 +405,9 @@ void rotate5colors(int repeat)
       {
         for (int j = 0; j < PARTS; j++)
         {
-          strip.fill(COLOR2[h + j], i + (j * PIXELPERPART), PIXELPERPART);
+          strip.fill(COLOR2[(h + j) % PARTS], i + (j * PIXELPERPART), PIXELPERPART);
           if (i + PIXELPERPART + (j * PIXELPERPART) > NUMPIXELS)
-            strip.fill(COLOR2[h + j], 0,  i );
+            strip.fill(COLOR2[(h + j) % PARTS], 0,  i );
         }
         strip.show();
         delay(delayval / 5);
@@ -420,7 +422,7 @@ void rotate10colors(int repeat)
   if (NUMPIXELS % 2 != 0)
     return;
   stripoff();
-  for (int k = 0; k < repeat * 5; k++)
+  for (int k = 0; k < repeat * 4; k++)
   {
     for (int h = PARTS - 1; h >= 0; h--) // loop through colors
     {
@@ -428,9 +430,9 @@ void rotate10colors(int repeat)
       {
         for (int j = 0; j < PARTS * 2; j++)
         {
-          strip.fill(COLOR2[h + j], i + (j * PIXELPERPART / 2), PIXELPERPART / 2);
+          strip.fill(COLOR2[(h + j) % PARTS], i + (j * PIXELPERPART / 2), PIXELPERPART / 2);
           if (i + PIXELPERPART / 2 + (j * PIXELPERPART / 2) > NUMPIXELS)
-            strip.fill(COLOR2[h + j], 0,  i );
+            strip.fill(COLOR2[(h + j) % PARTS], 0,  i );
         }
         strip.show();
         delay(delayval / 5);
@@ -439,9 +441,9 @@ void rotate10colors(int repeat)
   }
 }
 
-
-void rotatetips_old(int repeat)
-{
+/*
+  void rotatetips_old(int repeat)
+  {
   stripoff();
   // one total tip is lit, rotating
   for (int k = 0; k < repeat; k++)
@@ -463,8 +465,8 @@ void rotatetips_old(int repeat)
       }
     }
   }
-}
-
+  }
+*/
 void fadecolors(int repeat)
 {
   //fade in and out
@@ -592,8 +594,8 @@ void colorsfromtip3(int repeat)
     {
       for (int j = 0; j < (PARTS + 1); j++)
       {
-        strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[i]);
-        strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[i]);
+        strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[i % 3]);
+        strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[i % 3]);
         strip.show();
       }
       delay(delayval);
@@ -608,8 +610,8 @@ void steadycolors(int repeat)
   {
     for (int j = 0; j < (PARTS + 1); j++)
     {
-      strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[i]);
-      strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[i]);
+      strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[i % 3]);
+      strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[i % 3]);
       strip.show();
     }
   }
@@ -635,7 +637,7 @@ void colorchase(int repeat)
 void changecolors(int repeat)
 {
   stripoff();
-  for (int m = 0; m < repeat; m++) {
+  for (int m = 0; m < repeat * 2; m++) {
     for (int k = 0; k < 3; k++)
     {
       for (int i = 0; i < NUMPIXELS; i++)
@@ -659,8 +661,8 @@ void RGBcolorstocenter(int repeat)
       {
         for (int j = 0; j < (PARTS + 1); j++)
         {
-          strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[k + i]);
-          strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[k + i]);
+          strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[(k + i) % 3]);
+          strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[(k + i) % 3]);
         }
       }
       strip.show();
@@ -680,8 +682,8 @@ void RGBcolorsfromcenter(int repeat)
       {
         for (int j = 0; j < (PARTS + 1); j++)
         {
-          strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[k + i]);
-          strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[k + i]);
+          strip.setPixelColor(OFFSET + (j * (NUMPIXELS / PARTS) + i), COLOR[(k + i) % 3]);
+          strip.setPixelColor((OFFSET + (j + 1) * (NUMPIXELS / PARTS) - i), COLOR[(k + i) % 3]);
           strip.show();
         }
       }
