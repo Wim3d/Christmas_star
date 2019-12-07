@@ -16,7 +16,7 @@
 
 #define PIXELPERPART  (NUMPIXELS)/(PARTS)
 
-#define NUMPATTERNS   23
+#define NUMPATTERNS   22
 
 #define  RED           0xff0000
 #define  GREEN         0x00ff00
@@ -48,7 +48,6 @@ void loop()
   randNumber2 = random(2, 4);
   switcher = randNumber;
   repeater = randNumber2;
-
   switch (switcher)
   {
     case 1: changecolors(repeater); break;
@@ -72,7 +71,9 @@ void loop()
     case 19: rotate5colors(repeater); break;
     case 20: rotate10colors(repeater); break;
     case 21: randomfilloff(repeater); break;
+    case 22: colorchain(repeater); break;
   }
+
   /*
     switcher++;
     if (switcher > NUMPATTERNS)
@@ -105,6 +106,50 @@ uint32_t Wheel(byte WheelPos) {
   } else {
     WheelPos -= 170;
     return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  }
+}
+
+void colorchain(int repeat)
+{
+  //strip is filled with the first TWO different colors from the array which cycle with one increment
+  stripoff();
+  int lastledoff;
+  if (NUMPIXELS % 3 == 0) // XXO
+  {
+    pattern = 3;
+    lastledoff = 1; // pattern is XXO, so last one LED off
+  }
+  else if (NUMPIXELS % 4 == 0) // XXXO
+  {
+    pattern = 4;
+    lastledoff = 1; // pattern is XXXO, so last one LED off
+  }
+  else if (NUMPIXELS % 5 == 0) // XXXXO
+  {
+    pattern = 5;
+    lastledoff = 1; // pattern is XXXXO, so last one LED off
+  }
+  for (int k = 0; k < repeat * 5; k++)
+  {
+    for (int h = NUMPIXELS / pattern; h > 0; h--) // loop through colors
+    {
+      for (int i = 0; i < pattern; i++)
+      {
+        stripoffnoshow();
+        for (int j = 0; j < NUMPIXELS / pattern; j++)
+        {
+          strip.fill(COLOR[(h + j) % 2], i + (j * pattern), pattern - lastledoff); // last leds off
+          if (i + pattern + (j * pattern) > NUMPIXELS)
+          {
+            strip.fill(OFF, 0,  i );
+            if (i > lastledoff)
+              strip.fill(COLOR[(h + j) % 2], 0, i - lastledoff);
+          }
+        }
+        strip.show();
+        delay(delayval);
+      }
+    }
   }
 }
 
@@ -301,7 +346,7 @@ void rotate5colors(int repeat)
 {
   //strip is filled with PARTS different colors which cycle with one increment
   stripoff();
-  for (int k = 0; k < repeat; k++)
+  for (int k = 0; k < repeat * 2; k++)
   {
     for (int h = PARTS - 1; h >= 0; h--) // loop through colors
     {
@@ -326,7 +371,7 @@ void rotate10colors(int repeat)
   if (NUMPIXELS % 2 != 0)
     return;
   stripoff();
-  for (int k = 0; k < repeat; k++)
+  for (int k = 0; k < repeat * 5; k++)
   {
     for (int h = PARTS - 1; h >= 0; h--) // loop through colors
     {
@@ -603,4 +648,12 @@ void stripoff(void)
     strip.setPixelColor(i, OFF);
   }
   strip.show();
+}
+
+void stripoffnoshow(void)
+{
+  for (int i = 0; i < NUMPIXELS; i++)
+  {
+    strip.setPixelColor(i, OFF);
+  }
 }
