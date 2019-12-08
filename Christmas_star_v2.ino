@@ -5,7 +5,7 @@
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN            0
 
-#define BRIGHTNESS 100
+#define BRIGHTNESS    100
 
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS      50
@@ -29,11 +29,9 @@
 //long lastReconnectAttempt, lastBlink = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
-//uint32_t COLOR[] = {RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE, RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
-uint32_t COLOR[] = {RED, GREEN, BLUE}; // this array should be > NUMPIXELS/PARTS
-//uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE, RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > 3* PARTS
-uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be > PARTS
-uint32_t COLOR3[] = {RED, WHITE};
+uint32_t COLOR[] = {RED, GREEN, BLUE};
+uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be >= PARTS
+uint32_t COLOR3[] = {RED, WHITE}; 
 int delayval = 500; // delay for half a second
 
 long randNumber, randNumber2;
@@ -52,7 +50,6 @@ void loop()
   randNumber2 = random(2, 4);
   switcher = randNumber;
   repeater = randNumber2;
-
 
   switch (switcher)
   {
@@ -80,11 +77,11 @@ void loop()
     case 22: colorchain(repeater); break;
     case 23: candycane(repeater); break;
   }
-/*
-  switcher++;
-  if (switcher > NUMPATTERNS)
+  /*
+    switcher++;
+    if (switcher > NUMPATTERNS)
     switcher = 0;
-*/
+  */
 }
 
 // From Adafruit library
@@ -117,8 +114,11 @@ uint32_t Wheel(byte WheelPos) {
 
 void colorchain(int repeat)
 {
-  //strip is filled with TWO different colors which cycle with one increment
+  // strip is filled with different colors which cycle with one increment
+  // number of colors and loops is determined by number of leds.
   stripoff();
+
+  // determine pattern
   int lastledoff;
   if (NUMPIXELS % 3 == 0) // XXO
   {
@@ -135,21 +135,36 @@ void colorchain(int repeat)
     pattern = 5;
     lastledoff = 1; // pattern is XXXXO, so last one LED off
   }
-  for (int k = 0; k < repeat; k++)
+
+  //determine number of loops which fit on the closed circle chain
+  // for a straight, not closed strip, set the loops to the desired number of colors from array COLOR
+  int loops;
+  if (NUMPIXELS / pattern % 3 == 0) // 3 colors fit
   {
-    for (int h = NUMPIXELS / pattern; h > 0; h--) // loop through colors
+    loops = 3;
+  }
+  else if (NUMPIXELS / pattern % 2 == 0) // 2 colors fit
+  {
+    loops = 2;
+  }
+  else                    // oneven number of leds, only one color fits
+    loops = 1;
+
+  for (int k = 0; k < repeat*2; k++)
+  {
+    for (int h = loops; h > 0; h--) // loop through colors
     {
       for (int i = 0; i < pattern; i++)
       {
         stripoffnoshow();
         for (int j = 0; j < NUMPIXELS / pattern; j++)
         {
-          strip.fill(COLOR[(h + j) % 2], i + (j * pattern), pattern - lastledoff); // last leds off
+          strip.fill(COLOR[(h + j) % loops], i + (j * pattern), pattern - lastledoff); // last leds off
           if (i + pattern + (j * pattern) > NUMPIXELS)
           {
             strip.fill(OFF, 0,  i );
             if (i > lastledoff)
-              strip.fill(COLOR[(h + j) % 2], 0, i - lastledoff);
+              strip.fill(COLOR[(h + j) % loops], 0, i - lastledoff);
           }
         }
         strip.show();
@@ -179,9 +194,12 @@ void candycane(int repeat)
     pattern = 5;
     lastledoff = 0; // pattern is XXXXX, so last LED not off
   }
-  for (int k = 0; k < repeat; k++)
+  //determine number of loops. for a closed strip of LED, change the number of colors in the array COLOR3 to make a closed loop
+
+  int loops = (sizeof(COLOR3) / sizeof(COLOR3[0])); 
+  for (int k = 0; k < repeat*2; k++)
   {
-    for (int h = NUMPIXELS / pattern; h > 0; h--) // loop through colors
+    for (int h = loops; h > 0; h--) // loop through colors
     {
       for (int i = 0; i < pattern; i++)
       {
@@ -422,7 +440,7 @@ void rotate10colors(int repeat)
   if (NUMPIXELS % 2 != 0)
     return;
   stripoff();
-  for (int k = 0; k < repeat * 4; k++)
+  for (int k = 0; k < repeat * 2; k++)
   {
     for (int h = PARTS - 1; h >= 0; h--) // loop through colors
     {
