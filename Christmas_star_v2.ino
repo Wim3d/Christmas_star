@@ -5,7 +5,7 @@
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN            0
 
-#define BRIGHTNESS    100
+#define BRIGHTNESS 100
 
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS      50
@@ -29,13 +29,13 @@
 //long lastReconnectAttempt, lastBlink = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_RGB + NEO_KHZ800);
-uint32_t COLOR[] = {RED, GREEN, BLUE};
+uint32_t COLOR[] = {RED, GREEN, BLUE, WHITE, CYAN, MAGENTA};
 uint32_t COLOR2[] = {RED, CYAN, GREEN, MAGENTA, BLUE}; //this array should be >= PARTS
-uint32_t COLOR3[] = {RED, WHITE}; 
+uint32_t COLOR3[] = {RED, WHITE};
 int delayval = 500; // delay for half a second
 
 long randNumber, randNumber2;
-int pattern, repetitions;
+int repetitions;
 int switcher = 0, repeater = 1;
 
 void setup() {
@@ -119,7 +119,8 @@ void colorchain(int repeat)
   stripoff();
 
   // determine pattern
-  int lastledoff;
+  int pattern = 2; // default pattern is X0
+  int lastledoff = 1;
   if (NUMPIXELS % 3 == 0) // XXO
   {
     pattern = 3;
@@ -135,22 +136,31 @@ void colorchain(int repeat)
     pattern = 5;
     lastledoff = 1; // pattern is XXXXO, so last one LED off
   }
-
+  
   //determine number of loops which fit on the closed circle chain
   // for a straight, not closed strip, set the loops to the desired number of colors from array COLOR
   int loops;
-  if (NUMPIXELS / pattern % 3 == 0) // 3 colors fit
+  if (NUMPIXELS % 5 == 0 && (NUMPIXELS / pattern) % 5 == 0) // 5 colors fit
+  {
+    loops = 5;
+  }
+  else if (NUMPIXELS % 4 == 0 && (NUMPIXELS / pattern) % 4 == 0) // 4 colors fit
+  {
+    loops = 4;
+  }
+  else if (NUMPIXELS % 3 == 0 && (NUMPIXELS / pattern) % 3 == 0) // 3 colors fit
   {
     loops = 3;
   }
-  else if (NUMPIXELS / pattern % 2 == 0) // 2 colors fit
+  else if (NUMPIXELS % 2 == 0 && (NUMPIXELS / pattern) % 2 == 0) // 2 colors fit
   {
     loops = 2;
   }
   else                    // oneven number of leds, only one color fits
     loops = 1;
 
-  for (int k = 0; k < repeat*2; k++)
+  Serial.print("loops: "); Serial.println(loops);
+  for (int k = 0; k < repeat * 2; k++)
   {
     for (int h = loops; h > 0; h--) // loop through colors
     {
@@ -178,6 +188,7 @@ void candycane(int repeat)
 {
   //strip is filled with TWO different colors which cycle with one increment
   stripoff();
+  int pattern = 2; // default pattern is XX
   int lastledoff;
   if (NUMPIXELS % 3 == 0) // XXX
   {
@@ -196,8 +207,8 @@ void candycane(int repeat)
   }
   //determine number of loops. for a closed strip of LED, change the number of colors in the array COLOR3 to make a closed loop
 
-  int loops = (sizeof(COLOR3) / sizeof(COLOR3[0])); 
-  for (int k = 0; k < repeat*2; k++)
+  int loops = (sizeof(COLOR3) / sizeof(COLOR3[0]));
+  for (int k = 0; k < repeat * 2; k++)
   {
     for (int h = loops; h > 0; h--) // loop through colors
     {
